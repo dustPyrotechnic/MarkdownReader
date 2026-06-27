@@ -24,5 +24,11 @@ struct FolderListView: View {
                 folderStore.createFolder(name: "新文件夹", parent: nil, context: context)
             }
         }
+        .onAppear {
+            folderStore.ensureDefaultFolder(context: context)
+#if DEBUG
+            folderStore.seedTestDocumentIfNeeded(context: context)
+#endif
+        }
     }
 }

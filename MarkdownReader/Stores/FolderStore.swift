@@ -52,4 +52,32 @@ final class FolderStore {
         }
         context.delete(folder)
     }
+
+#if DEBUG
+    /// DEBUG 专用：将 Bundle 内的 test-render.md 注入到「未分类」文件夹。
+    /// 已存在同名文档时跳过，避免重复。
+    func seedTestDocumentIfNeeded(context: ModelContext) {
+        let inbox = ensureDefaultFolder(context: context)
+        let existingNames = (inbox.documents ?? []).map(\.fileName)
+        guard !existingNames.contains("test-render.md") else { return }
+
+        guard let bundleURL = Bundle.main.url(forResource: "test-render", withExtension: "md") else { return }
+
+        let destDir = URL.documentsDirectory.appending(path: Self.defaultFolderName)
+        let destURL = destDir.appending(path: "test-render.md")
+        do {
+            try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+            if FileManager.default.fileExists(atPath: destURL.path) {
+                try FileManager.default.removeItem(at: destURL)
+            }
+            try FileManager.default.copyItem(at: bundleURL, to: destURL)
+        } catch {
+            return
+        }
+
+        let doc = Document(fileName: "test-render.md", relativePath: "\(Self.defaultFolderName)/test-render.md")
+        doc.folder = inbox
+        context.insert(doc)
+    }
+#endif
 }
