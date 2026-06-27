@@ -18,9 +18,6 @@ struct MarkdownReaderApp: App {
         WindowGroup {
             RootView()
                 .environment(folderStore)
-                .task {
-                    AppBootstrap.run(store: folderStore, context: container.mainContext)
-                }
         }
         .modelContainer(container)
     }

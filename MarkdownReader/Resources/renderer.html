@@ -41,37 +41,478 @@
   table { border-collapse: collapse; width: 100%; }
   th, td { border: 1px solid var(--border); padding: 8px 12px; }
   th { background: var(--code-bg); }
+  .table-of-contents {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 20px 0;
+    background: var(--code-bg);
+  }
+  .table-of-contents-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .table-of-contents ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  .table-of-contents li {
+    margin: 4px 0;
+  }
+  .table-of-contents a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .table-of-contents a:hover {
+    text-decoration: underline;
+  }
   .annotation-highlight { background: rgba(255, 214, 0, 0.4); border-radius: 2px; cursor: pointer; }
-  .mermaid { text-align: center; }
+  .mermaid { text-align: center; overflow-x: auto; }
+  .render-warning { color: #b42318; background: #fff4f2; border: 1px solid #ffcdc5; border-radius: 6px; padding: 12px; }
+  .katex-display { overflow-x: auto; overflow-y: hidden; }
 </style>
 </head>
 <body>
 <div id="content"></div>
 
 <script src="marked.min.js"></script>
-<script src="katex.min.js"></script>
-<script src="katex-auto-render.min.js"></script>
 <script src="highlight.min.js"></script>
-<script src="mermaid.min.js"></script>
 <script>
   // 配置 marked
   marked.setOptions({ gfm: true, breaks: true });
 
-  // 配置 mermaid
-  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+  let katexReady = false;
+  let highlightReady = typeof window.hljs !== 'undefined';
+  let mermaidReady = false;
+  let renderSequence = 0;
+
+  function stringifyError(error) {
+    if (!error) { return ''; }
+    if (error.stack) { return error.stack; }
+    if (error.message) { return error.message; }
+    return String(error);
+  }
+
+  function renderLog(level, message, data = {}) {
+    const payload = {
+      level,
+      message,
+      data,
+      timestamp: new Date().toISOString()
+    };
+    console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](
+      `[MarkdownRenderer] ${message}`,
+      data
+    );
+    try {
+      window.webkit?.messageHandlers?.renderLog?.postMessage(payload);
+    } catch (_) {
+      // Logging must never affect rendering.
+    }
+  }
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      renderLog('info', 'script load start', { src });
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => {
+        renderLog('info', 'script load finish', { src });
+        resolve();
+      };
+      script.onerror = () => {
+        const error = new Error(`Failed to load ${src}`);
+        renderLog('error', 'script load failed', { src, error: stringifyError(error) });
+        reject(error);
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  async function loadKatex() {
+    if (katexReady) {
+      renderLog('info', 'katex already loaded');
+      return;
+    }
+    await loadScript('katex.min.js');
+    await loadScript('katex-auto-render.min.js');
+    katexReady = true;
+    renderLog('info', 'katex ready');
+  }
+
+  async function loadHighlight() {
+    if (highlightReady || typeof window.hljs !== 'undefined') {
+      highlightReady = true;
+      renderLog('info', 'highlight already loaded');
+      return true;
+    }
+
+    try {
+      await loadScript('highlight.min.js');
+      highlightReady = typeof window.hljs !== 'undefined';
+      renderLog(highlightReady ? 'info' : 'warn', 'highlight load finish', {
+        available: highlightReady
+      });
+      return highlightReady;
+    } catch (error) {
+      renderLog('warn', 'highlight load failed', {
+        error: stringifyError(error)
+      });
+      return false;
+    }
+  }
+
+  async function loadMermaid() {
+    if (mermaidReady) {
+      renderLog('info', 'mermaid already loaded');
+      return;
+    }
+    await loadScript('mermaid.min.js');
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: false, theme: 'default' });
+      mermaidReady = true;
+      renderLog('info', 'mermaid ready');
+    } else {
+      renderLog('error', 'mermaid script loaded but window.mermaid is missing');
+    }
+  }
+
+  function markdownHasMath(markdown) {
+    return /(^|\n)\s*\$\$[\s\S]+?\$\$\s*(\n|$)/.test(markdown)
+      || /(^|\n)\s*\\\[[\s\S]+?\\\]\s*(\n|$)/.test(markdown)
+      || /(^|[^\\$])\$[^$\n]+?\$/.test(markdown)
+      || /\\\([^)]*\\\)/.test(markdown);
+  }
+
+  function escapeHtml(value) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function extractSpecialBlocks(markdown) {
+    const mathBlocks = [];
+    const mermaidBlocks = [];
+    let source = markdown.replace(
+      /(^|\n)([ \t]*)\$\$\s*\n([\s\S]*?)\n[ \t]*\$\$(?=\n|$)/g,
+      (match, prefix, indent, formula) => {
+        const token = `@@MARKDOWN_READER_MATH_${mathBlocks.length}@@`;
+        mathBlocks.push(formula.trim());
+        return `${prefix}${token}`;
+      }
+    );
+
+    source = source.replace(
+      /(^|\n)```mermaid[ \t]*\n([\s\S]*?)\n[ \t]*```(?=\n|$)/gi,
+      (match, prefix, diagram) => {
+        const token = `@@MARKDOWN_READER_MERMAID_${mermaidBlocks.length}@@`;
+        mermaidBlocks.push(diagram.trim());
+        return `${prefix}${token}`;
+      }
+    );
+
+    return { source, mathBlocks, mermaidBlocks };
+  }
+
+  function stripFrontMatter(markdown) {
+    const frontMatterPattern = /^(?:\uFEFF)?---[ \t]*\n[\s\S]*?\n---[ \t]*(?:\n|$)/;
+    if (!frontMatterPattern.test(markdown)) {
+      return markdown;
+    }
+
+    renderLog('info', 'front matter stripped');
+    return markdown.replace(frontMatterPattern, '');
+  }
+
+  function replaceTokenParagraph(content, token, replacement) {
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      if (walker.currentNode.nodeValue.includes(token)) {
+        nodes.push(walker.currentNode);
+      }
+    }
+
+    nodes.forEach(textNode => {
+      const holder = textNode.parentElement?.closest('p, li, div') ?? textNode.parentElement;
+      if (holder && holder.textContent.trim() === token) {
+        holder.replaceWith(replacement);
+      } else {
+        textNode.nodeValue = textNode.nodeValue.replace(token, '');
+        textNode.parentElement?.after(replacement);
+      }
+    });
+  }
+
+  function restoreMathBlocks(content, mathBlocks) {
+    mathBlocks.forEach((formula, index) => {
+      const container = document.createElement('div');
+      container.className = 'math-block';
+      container.dataset.formula = formula;
+      replaceTokenParagraph(content, `@@MARKDOWN_READER_MATH_${index}@@`, container);
+    });
+    renderLog('info', 'math blocks restored', { count: mathBlocks.length });
+  }
+
+  function restoreMermaidBlocks(content, mermaidBlocks) {
+    mermaidBlocks.forEach((diagram, index) => {
+      const container = document.createElement('div');
+      container.className = 'mermaid';
+      container.dataset.diagram = diagram;
+      container.textContent = diagram;
+      replaceTokenParagraph(content, `@@MARKDOWN_READER_MERMAID_${index}@@`, container);
+    });
+    renderLog('info', 'mermaid blocks restored', { count: mermaidBlocks.length });
+  }
+
+  function isRelativeURL(value) {
+    if (!value || value.startsWith('#')) { return false; }
+    return !/^[a-z][a-z0-9+.-]*:/i.test(value) && !value.startsWith('//');
+  }
+
+  function resolveRelativeResources(content, baseURL) {
+    if (!baseURL) {
+      renderLog('info', 'relative resource resolution skipped', { reason: 'missing baseURL' });
+      return;
+    }
+
+    const resolved = { images: 0, links: 0 };
+    content.querySelectorAll('img[src]').forEach(image => {
+      const src = image.getAttribute('src') ?? '';
+      if (!isRelativeURL(src)) { return; }
+      image.setAttribute('src', new URL(src, baseURL).href);
+      resolved.images += 1;
+    });
+
+    content.querySelectorAll('a[href]').forEach(link => {
+      const href = link.getAttribute('href') ?? '';
+      if (!isRelativeURL(href)) { return; }
+      link.setAttribute('href', new URL(href, baseURL).href);
+      resolved.links += 1;
+    });
+
+    renderLog('info', 'relative resources resolved', {
+      baseURL,
+      ...resolved
+    });
+  }
+
+  function slugifyHeading(text, fallback) {
+    const slug = text
+      .trim()
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[^\p{Letter}\p{Number}\s_-]/gu, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    return slug || fallback;
+  }
+
+  function ensureUniqueHeadingId(heading, usedIds, index) {
+    const existing = heading.getAttribute('id');
+    const base = existing || slugifyHeading(heading.textContent ?? '', `heading-${index + 1}`);
+    let candidate = base;
+    let suffix = 2;
+    while (usedIds.has(candidate)) {
+      candidate = `${base}-${suffix}`;
+      suffix += 1;
+    }
+    usedIds.add(candidate);
+    heading.id = candidate;
+    return candidate;
+  }
+
+  function buildTableOfContents(content) {
+    const tocPlaceholders = Array.from(content.querySelectorAll('p')).filter(node => {
+      const text = node.textContent.trim().toLowerCase();
+      return text === '[toc]' || text === '[[toc]]';
+    });
+    if (tocPlaceholders.length === 0) { return; }
+
+    const usedIds = new Set();
+    const headings = Array.from(content.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+      .filter(heading => !heading.closest('.table-of-contents'))
+      .map((heading, index) => {
+        const level = Number(heading.tagName.slice(1));
+        const id = ensureUniqueHeadingId(heading, usedIds, index);
+        return {
+          id,
+          level,
+          title: heading.textContent.trim()
+        };
+      })
+      .filter(item => item.title.length > 0);
+
+    tocPlaceholders.forEach(placeholder => {
+      const nav = document.createElement('nav');
+      nav.className = 'table-of-contents';
+      nav.setAttribute('aria-label', '目录');
+
+      const title = document.createElement('div');
+      title.className = 'table-of-contents-title';
+      title.textContent = '目录';
+      nav.appendChild(title);
+
+      const list = document.createElement('ul');
+      headings.forEach(item => {
+        const entry = document.createElement('li');
+        entry.style.paddingLeft = `${Math.max(0, item.level - 1) * 14}px`;
+
+        const link = document.createElement('a');
+        link.href = `#${encodeURIComponent(item.id)}`;
+        link.textContent = item.title;
+
+        entry.appendChild(link);
+        list.appendChild(entry);
+      });
+
+      nav.appendChild(list);
+      placeholder.replaceWith(nav);
+    });
+
+    renderLog('info', 'table of contents built', {
+      placeholderCount: tocPlaceholders.length,
+      headingCount: headings.length
+    });
+  }
 
   // 渲染 Markdown
-  function render(markdown) {
-    document.getElementById('content').innerHTML = marked.parse(markdown);
-    renderMathInElement(document.getElementById('content'), {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false }
-      ]
+  async function render(markdown, baseURL = '') {
+    const renderId = ++renderSequence;
+    const startedAt = performance.now();
+    renderLog('info', 'render start', {
+      renderId,
+      markdownLength: markdown.length,
+      baseURL
     });
-    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
-    mermaid.run({ nodes: document.querySelectorAll('.language-mermaid') });
+
+    const content = document.getElementById('content');
+    const renderSource = stripFrontMatter(markdown);
+    const blocks = extractSpecialBlocks(renderSource);
+    try {
+      content.innerHTML = marked.parse(blocks.source);
+      renderLog('info', 'marked parse finish', {
+        renderId,
+        elementCount: content.querySelectorAll('*').length,
+        mathBlockCount: blocks.mathBlocks.length,
+        mermaidBlockCount: blocks.mermaidBlocks.length
+      });
+    } catch (error) {
+      renderLog('error', 'marked parse failed', {
+        renderId,
+        error: stringifyError(error)
+      });
+      throw error;
+    }
+
+    restoreMathBlocks(content, blocks.mathBlocks);
+    restoreMermaidBlocks(content, blocks.mermaidBlocks);
+    buildTableOfContents(content);
+    resolveRelativeResources(content, baseURL);
+    const codeBlocks = content.querySelectorAll('pre code');
+    renderLog('info', 'code highlight start', {
+      renderId,
+      codeBlockCount: codeBlocks.length
+    });
+    if (codeBlocks.length > 0 && await loadHighlight()) {
+      codeBlocks.forEach(el => window.hljs.highlightElement(el));
+      renderLog('info', 'code highlight finish', { renderId });
+    } else {
+      renderLog('warn', 'code highlight skipped', {
+        renderId,
+        reason: codeBlocks.length === 0 ? 'no code blocks' : 'hljs unavailable'
+      });
+    }
+
+    const hasMath = markdownHasMath(markdown);
+    const mermaidNodes = content.querySelectorAll('.mermaid');
+    renderLog('info', 'feature detection finish', {
+      renderId,
+      hasMath,
+      mermaidCount: mermaidNodes.length
+    });
+
+    if (hasMath) {
+      try {
+        renderLog('info', 'katex render start', { renderId });
+        await loadKatex();
+        content.querySelectorAll('.math-block').forEach(node => {
+          const formula = node.dataset.formula ?? '';
+          try {
+            katex.render(formula, node, {
+              displayMode: true,
+              throwOnError: false
+            });
+          } catch (error) {
+            renderLog('warn', 'katex block render failed', {
+              renderId,
+              formula,
+              error: stringifyError(error)
+            });
+            node.innerHTML = `<pre class="render-warning">KaTeX 渲染失败：${escapeHtml(error?.message || String(error))}</pre>`;
+          }
+        });
+        renderMathInElement(content, {
+          delimiters: [
+            { left: '\\[', right: '\\]', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false }
+          ],
+          throwOnError: false
+        });
+        renderLog('info', 'katex render finish', { renderId });
+      } catch (error) {
+        renderLog('warn', 'katex render failed', {
+          renderId,
+          error: stringifyError(error)
+        });
+      }
+    }
+
+    if (mermaidNodes.length > 0) {
+      try {
+        renderLog('info', 'mermaid render start', {
+          renderId,
+          mermaidCount: mermaidNodes.length,
+          samples: Array.from(mermaidNodes).slice(0, 3).map(node => node.textContent.slice(0, 120))
+        });
+        await loadMermaid();
+        for (const [index, node] of Array.from(mermaidNodes).entries()) {
+          const diagram = node.dataset.diagram ?? node.textContent;
+          const diagramId = `markdown-reader-mermaid-${renderId}-${index}`;
+          const { svg, bindFunctions } = await mermaid.render(diagramId, diagram);
+          node.innerHTML = svg;
+          bindFunctions?.(node);
+        }
+        renderLog('info', 'mermaid render finish', { renderId });
+      } catch (error) {
+        renderLog('warn', 'mermaid render failed', {
+          renderId,
+          error: stringifyError(error)
+        });
+        Array.from(mermaidNodes).forEach(node => {
+          if (!node.querySelector('.render-warning')) {
+            const warning = document.createElement('pre');
+            warning.className = 'render-warning';
+            warning.textContent = `Mermaid 渲染失败：${error?.message || error}`;
+            node.replaceChildren(warning);
+          }
+        });
+      }
+    }
+
     restoreAnnotations();
+    renderLog('info', 'render finish', {
+      renderId,
+      durationMs: Math.round(performance.now() - startedAt),
+      elementCount: content.querySelectorAll('*').length
+    });
+    return true;
   }
 
   // 批注相关

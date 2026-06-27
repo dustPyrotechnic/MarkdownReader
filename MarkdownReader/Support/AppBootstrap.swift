@@ -6,6 +6,9 @@ enum AppBootstrap {
     @MainActor
     static func run(store: FolderStore, context: ModelContext) {
         store.ensureDefaultFolder(context: context)
+#if DEBUG
+        store.seedRendererTestDocumentsIfNeeded(context: context)
+#endif
         try? context.save()
     }
 }

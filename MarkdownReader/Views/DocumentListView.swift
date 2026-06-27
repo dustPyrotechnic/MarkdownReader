@@ -16,9 +16,6 @@ struct DocumentListView: View {
             }
         }
         .navigationTitle(folder.name)
-        .navigationDestination(for: Document.self) { doc in
-            ReaderView(document: doc)
-        }
         .overlay {
             if (folder.documents ?? []).isEmpty {
                 ContentUnavailableView("暂无文档", systemImage: "doc.text")

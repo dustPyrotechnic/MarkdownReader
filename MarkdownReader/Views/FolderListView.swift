@@ -16,19 +16,10 @@ struct FolderListView: View {
             }
         }
         .navigationTitle("文档库")
-        .navigationDestination(for: Folder.self) { folder in
-            DocumentListView(folder: folder)
-        }
         .toolbar {
             Button("新建文件夹", systemImage: "folder.badge.plus") {
                 folderStore.createFolder(name: "新文件夹", parent: nil, context: context)
             }
-        }
-        .onAppear {
-            folderStore.ensureDefaultFolder(context: context)
-#if DEBUG
-            folderStore.seedTestDocumentIfNeeded(context: context)
-#endif
         }
     }
 }

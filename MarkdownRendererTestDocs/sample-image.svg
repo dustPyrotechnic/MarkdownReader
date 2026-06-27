@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240" role="img" aria-labelledby="title desc">
+  <title id="title">MarkdownReader local image fixture</title>
+  <desc id="desc">A local image used by the Markdown renderer test document.</desc>
+  <rect width="720" height="240" rx="18" fill="#f8fafc"/>
+  <rect x="18" y="18" width="684" height="204" rx="14" fill="#ffffff" stroke="#d0d7de" stroke-width="2"/>
+  <circle cx="112" cy="120" r="54" fill="#2563eb"/>
+  <path d="M84 127l22 22 44-58" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="198" y="104" fill="#111827" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="34" font-weight="700">Local image loaded</text>
+  <text x="198" y="150" fill="#4b5563" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="24">Relative paths resolve from the Markdown file folder.</text>
+</svg>
