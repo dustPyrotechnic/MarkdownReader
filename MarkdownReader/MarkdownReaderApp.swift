@@ -5,6 +5,7 @@ import SwiftData
 struct MarkdownReaderApp: App {
     private let container: ModelContainer
     @State private var folderStore = FolderStore()
+    @State private var importer = DocumentImporter()
 
     init() {
         do {
@@ -18,6 +19,7 @@ struct MarkdownReaderApp: App {
         WindowGroup {
             RootView()
                 .environment(folderStore)
+                .environment(importer)
         }
         .modelContainer(container)
     }

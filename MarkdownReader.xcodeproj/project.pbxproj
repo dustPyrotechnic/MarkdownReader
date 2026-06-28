@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CAC000012FEEF00100F6276D /* MarkdownReaderShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CAC000002FEEF00100F6276D /* MarkdownReaderShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CAC0000F2FEEF00100F6276D /* MarkdownReader/Support/ShareURLScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC0000E2FEEF00100F6276D /* MarkdownReader/Support/ShareURLScheme.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CA8265BF2FEE505700F6276D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +26,35 @@
 			remoteGlobalIDString = CA8265B02FEE505500F6276D;
 			remoteInfo = MarkdownReader;
 		};
+		CAC0000C2FEEF00100F6276D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CA8265A92FEE505500F6276D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CAC000042FEEF00100F6276D;
+			remoteInfo = MarkdownReaderShare;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CAC000022FEEF00100F6276D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CAC000012FEEF00100F6276D /* MarkdownReaderShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		CA8265B12FEE505500F6276D /* MarkdownReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MarkdownReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA8265BE2FEE505700F6276D /* MarkdownReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkdownReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA8265C82FEE505700F6276D /* MarkdownReaderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MarkdownReaderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAC000002FEEF00100F6276D /* MarkdownReaderShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MarkdownReaderShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAC0000E2FEEF00100F6276D /* MarkdownReader/Support/ShareURLScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownReader/Support/ShareURLScheme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +71,11 @@
 		CA8265CB2FEE505700F6276D /* MarkdownReaderUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MarkdownReaderUITests;
+			sourceTree = "<group>";
+		};
+		CAC000032FEEF00100F6276D /* MarkdownReaderShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MarkdownReaderShare;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +102,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAC000052FEEF00100F6276D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -76,9 +116,11 @@
 			isa = PBXGroup;
 			children = (
 				CA8265B32FEE505500F6276D /* MarkdownReader */,
+				CAC000032FEEF00100F6276D /* MarkdownReaderShare */,
 				CA8265C12FEE505700F6276D /* MarkdownReaderTests */,
 				CA8265CB2FEE505700F6276D /* MarkdownReaderUITests */,
 				CA8265B22FEE505500F6276D /* Products */,
+				CAE2E4802FF108900005691D /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -86,10 +128,19 @@
 			isa = PBXGroup;
 			children = (
 				CA8265B12FEE505500F6276D /* MarkdownReader.app */,
+				CAC000002FEEF00100F6276D /* MarkdownReaderShare.appex */,
 				CA8265BE2FEE505700F6276D /* MarkdownReaderTests.xctest */,
 				CA8265C82FEE505700F6276D /* MarkdownReaderUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CAE2E4802FF108900005691D /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				CAC0000E2FEEF00100F6276D /* MarkdownReader/Support/ShareURLScheme.swift */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,10 +153,12 @@
 				CA8265AD2FEE505500F6276D /* Sources */,
 				CA8265AE2FEE505500F6276D /* Frameworks */,
 				CA8265AF2FEE505500F6276D /* Resources */,
+				CAC000022FEEF00100F6276D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CAC0000D2FEEF00100F6276D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				CA8265B32FEE505500F6276D /* MarkdownReader */,
@@ -163,6 +216,28 @@
 			productReference = CA8265C82FEE505700F6276D /* MarkdownReaderUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		CAC000042FEEF00100F6276D /* MarkdownReaderShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAC000102FEEF00100F6276D /* Build configuration list for PBXNativeTarget "MarkdownReaderShare" */;
+			buildPhases = (
+				CAC000062FEEF00100F6276D /* Sources */,
+				CAC000052FEEF00100F6276D /* Frameworks */,
+				CAC000072FEEF00100F6276D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CAC000032FEEF00100F6276D /* MarkdownReaderShare */,
+			);
+			name = MarkdownReaderShare;
+			packageProductDependencies = (
+			);
+			productName = MarkdownReaderShare;
+			productReference = CAC000002FEEF00100F6276D /* MarkdownReaderShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,6 +259,9 @@
 						CreatedOnToolsVersion = 26.5;
 						TestTargetID = CA8265B02FEE505500F6276D;
 					};
+					CAC000042FEEF00100F6276D = {
+						CreatedOnToolsVersion = 26.5;
+					};
 				};
 			};
 			buildConfigurationList = CA8265AC2FEE505500F6276D /* Build configuration list for PBXProject "MarkdownReader" */;
@@ -201,6 +279,7 @@
 			projectRoot = "";
 			targets = (
 				CA8265B02FEE505500F6276D /* MarkdownReader */,
+				CAC000042FEEF00100F6276D /* MarkdownReaderShare */,
 				CA8265BD2FEE505700F6276D /* MarkdownReaderTests */,
 				CA8265C72FEE505700F6276D /* MarkdownReaderUITests */,
 			);
@@ -223,6 +302,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CA8265C62FEE505700F6276D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAC000072FEEF00100F6276D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -253,6 +339,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAC000062FEEF00100F6276D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAC0000F2FEEF00100F6276D /* MarkdownReader/Support/ShareURLScheme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -265,6 +359,11 @@
 			isa = PBXTargetDependency;
 			target = CA8265B02FEE505500F6276D /* MarkdownReader */;
 			targetProxy = CA8265C92FEE505700F6276D /* PBXContainerItemProxy */;
+		};
+		CAC0000D2FEEF00100F6276D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CAC000042FEEF00100F6276D /* MarkdownReaderShare */;
+			targetProxy = CAC0000C2FEEF00100F6276D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -399,12 +498,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LF6C69B29M;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/MarkdownReader-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -431,12 +527,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LF6C69B29M;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/MarkdownReader-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -538,6 +631,64 @@
 			};
 			name = Release;
 		};
+		CAC000112FEEF00100F6276D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LF6C69B29M;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/MarkdownReaderShare-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = xiaochenstudio.com.MarkdownReader.MarkdownReaderShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CAC000122FEEF00100F6276D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LF6C69B29M;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/MarkdownReaderShare-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = xiaochenstudio.com.MarkdownReader.MarkdownReaderShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -573,6 +724,15 @@
 			buildConfigurations = (
 				CA8265D92FEE505700F6276D /* Debug */,
 				CA8265DA2FEE505700F6276D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CAC000102FEEF00100F6276D /* Build configuration list for PBXNativeTarget "MarkdownReaderShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAC000112FEEF00100F6276D /* Debug */,
+				CAC000122FEEF00100F6276D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

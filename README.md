@@ -132,6 +132,9 @@ View 更新 UI
 
 ```
 MarkdownReader/
+├── Config/
+│   ├── MarkdownReader-Info.plist
+│   └── MarkdownReaderShare-Info.plist
 ├── Models/
 │   ├── Folder.swift
 │   ├── Document.swift
@@ -151,6 +154,8 @@ MarkdownReader/
     ├── marked.min.js
     ├── katex.min.js
     └── mermaid.min.js
+MarkdownReaderShare/
+└── ShareViewController.swift
 ```
 
 ---
@@ -185,9 +190,13 @@ Swift（批注数据 ↔ SwiftData）
 
 | 入口 | 实现方式 |
 |------|---------|
-| "用...打开" | `UTType.text` / `.markdown` Document Type |
-| 分享菜单 | Share Extension |
-| 系统文件 App | UIFileSharingEnabled + LSSupportsOpeningDocumentsInPlace |
+| "用...打开" / 文件 App | `CFBundleDocumentTypes` + `net.daringfireball.markdown` / `public.plain-text` |
+| 分享菜单 | `MarkdownReaderShare` Share Extension |
+| 扩展回传主 App | `markdownreader://import?path=<file-url>` URL Scheme |
+
+导入模块集中在 `DocumentImporter`：只接受 `.md` / `.markdown` / `.txt`，通过安全作用域读取外部 URL，拷贝到 `Documents/<文件夹名>/<文件名>`，再登记 SwiftData `Document`。重名文件按 `name-1.ext` 递增，不覆盖原文件。当前设计是拷贝入沙盒，不原地打开外部文档，`LSSupportsOpeningDocumentsInPlace = false`。
+
+详细实现与测试命令见 `docs/modules/file-import.md`。
 
 ---
 
@@ -238,7 +247,7 @@ Swift（批注数据 ↔ SwiftData）
 ### MVP
 - [ ] 项目架构搭建
 - [ ] WKWebView 渲染引擎（GFM + KaTeX + Mermaid）
-- [ ] 文件导入（Open In / Share Extension / Files App）
+- [x] 文件导入（Open In / Share Extension / Files App）
 - [ ] 多级文件夹管理（SwiftData）
 - [ ] 批阅功能（划线 + 文字/Emoji 评注）
 - [ ] SWCharSphere 加载动画集成
