@@ -25,9 +25,7 @@ struct ReaderView: View {
             .ignoresSafeArea(edges: .bottom)
 
             if isLoading {
-                ProgressView("正在渲染…")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.background.opacity(0.95))
+                SWCharSphereLoadingView(glyphs: MarkdownKeywords.glyphs(from: markdown))
             }
 
         }
