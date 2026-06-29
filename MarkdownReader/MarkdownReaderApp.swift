@@ -6,6 +6,7 @@ struct MarkdownReaderApp: App {
     private let container: ModelContainer
     @State private var folderStore = FolderStore()
     @State private var importer = DocumentImporter()
+    @State private var annotationStore = AnnotationStore()
 
     init() {
         do {
@@ -20,6 +21,7 @@ struct MarkdownReaderApp: App {
             RootView()
                 .environment(folderStore)
                 .environment(importer)
+                .environment(annotationStore)
         }
         .modelContainer(container)
     }
