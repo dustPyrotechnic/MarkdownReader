@@ -101,6 +101,43 @@ struct DocumentImporterTests {
         #expect(!FileManager.default.fileExists(atPath: sandbox.appending(path: "技术/a.pdf").path))
     }
 
+    @Test func 来源文件不存在时抛unreadableSource() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+        let folder = Folder(name: "技术")
+        context.insert(folder)
+        let sandbox = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: sandbox) }
+        let importer = DocumentImporter(documentsBaseURL: sandbox, fileManager: .default)
+
+        // 扩展名合法但路径并不存在的来源文件。
+        let missing = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString)
+            .appending(path: "ghost.md")
+        #expect(throws: DocumentImporter.ImportError.unreadableSource) {
+            try importer.importFile(from: missing, into: folder, context: context)
+        }
+        #expect(!FileManager.default.fileExists(atPath: sandbox.appending(path: "技术/ghost.md").path))
+    }
+
+    @Test func 安全作用域导入失败时返回nil并写入lastError() throws {
+        let container = try TestModelContainer.make()
+        let context = container.mainContext
+        let folder = Folder(name: "技术")
+        context.insert(folder)
+        let sandbox = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: sandbox) }
+        let importer = DocumentImporter(documentsBaseURL: sandbox, fileManager: .default)
+
+        let source = makeSourceFile(name: "a.pdf", body: "x")
+        defer { try? FileManager.default.removeItem(at: source.deletingLastPathComponent()) }
+        let result = importer.importSecurityScopedFile(from: source, into: folder, context: context)
+
+        #expect(result == nil)
+        #expect(importer.lastError != nil)
+        #expect(importer.isImporting == false)
+    }
+
     /// 造一个临时「外部源文件」。
     private func makeSourceFile(name: String, body: String) -> URL {
         let dir = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)

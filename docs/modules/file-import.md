@@ -66,3 +66,11 @@ xcodebuild test \
 - 微信 / QQ / 其他 App 分享 `.md`，应通过 Share Extension 唤起主 App 并导入。
 - 同名导入应生成 `-1` 后缀，不覆盖原文件。
 - 分享 `.pdf` 等非法类型不应生成空记录。
+
+失败路径单测覆盖（`DocumentImporterTests`）：不支持扩展名 `unsupportedType`、来源文件不存在 `unreadableSource`、`importSecurityScopedFile` 失败返回 `nil` 并写入 `lastError`、同名去重不覆盖。
+
+## 关联文档
+
+- `docs/plans/2026-06-28-task8-10-file-import.md` —— 阶段四原始实施计划。
+- `docs/plans/2026-06-29-phase4-internship-plan.md` —— 阶段四实习走读计划。
+- `docs/plans/2026-06-29-phase4-deliverables.md` —— 阶段四交付记录（含真机验收表）。

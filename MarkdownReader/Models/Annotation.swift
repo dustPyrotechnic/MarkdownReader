@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-/// 针对文档某一字符区间的批注（阶段四启用 UI）。
+/// 针对文档某一字符区间的批注（阶段五启用 UI）。
 @Model
 final class Annotation {
     var id: UUID = UUID()

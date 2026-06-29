@@ -31,3 +31,5 @@
 - `docs/modules/file-import.md` —— 文件导入模块设计、文件布局、测试和真机验收项。
 - `README.md` —— 产品定位、完整技术架构、UI 方向、批阅设计、路线图。
 - `docs/plans/2026-06-26-mvp.md` —— MVP 逐 Task 实施计划。
+- `docs/plans/2026-06-29-phase4-deliverables.md` —— 阶段四文件导入交付记录（模块走读、测试覆盖、真机验收表）。
+- `docs/plans/2026-06-29-phase5-annotation.md` —— 阶段五批阅 HUD + 持久化逐 Task 实施计划。
