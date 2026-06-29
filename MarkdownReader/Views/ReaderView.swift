@@ -29,6 +29,11 @@ struct ReaderView: View {
             }
 
         }
+        .sheet(isPresented: $showAnnotationHUD) {
+            if let currentSelection {
+                AnnotationHUD(selection: currentSelection, document: document)
+            }
+        }
         .navigationTitle(document.fileName)
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadMarkdown() }
