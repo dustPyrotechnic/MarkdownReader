@@ -68,6 +68,7 @@
     text-decoration: underline;
   }
   .annotation-highlight { background: rgba(255, 214, 0, 0.4); border-radius: 2px; cursor: pointer; }
+  .annotation-highlight[data-emoji]::after { content: attr(data-emoji); font-size: 0.8em; margin-left: 2px; }
   .mermaid { text-align: center; overflow-x: auto; }
   .render-warning { color: #b42318; background: #fff4f2; border: 1px solid #ffcdc5; border-radius: 6px; padding: 12px; }
   .katex-display { overflow-x: auto; overflow-y: hidden; }
@@ -524,9 +525,46 @@
   }
 
   function restoreAnnotations() {
-    // 简化实现：重置高亮后重新渲染（MVP 阶段基于字符偏移）
-    document.querySelectorAll('.annotation-highlight').forEach(el => {
+    const root = document.getElementById('content');
+    if (!root) return;
+    // 先清除旧高亮
+    root.querySelectorAll('.annotation-highlight').forEach(el => {
+      const parent = el.parentNode;
       el.replaceWith(...el.childNodes);
+      parent.normalize();
+    });
+    // 按起点降序处理，避免包裹后偏移漂移
+    [...annotations]
+      .filter(a => a.rangeEnd > a.rangeStart)
+      .sort((a, b) => b.rangeStart - a.rangeStart)
+      .forEach(a => wrapRange(root, a));
+  }
+
+  // 把 [start, end) 字符区间内的每个文本节点片段包进高亮 span
+  function wrapRange(root, annotation) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let count = 0;
+    let node;
+    const segments = [];
+    while ((node = walker.nextNode())) {
+      const len = node.textContent.length;
+      const nodeStart = count;
+      const nodeEnd = count + len;
+      count = nodeEnd;
+      const from = Math.max(annotation.rangeStart, nodeStart);
+      const to = Math.min(annotation.rangeEnd, nodeEnd);
+      if (to > from) segments.push({ node, from: from - nodeStart, to: to - nodeStart });
+    }
+    // 倒序切分同一节点不影响其它节点
+    segments.reverse().forEach(seg => {
+      const range = document.createRange();
+      range.setStart(seg.node, seg.from);
+      range.setEnd(seg.node, seg.to);
+      const span = document.createElement('span');
+      span.className = 'annotation-highlight';
+      if (annotation.emoji) span.dataset.emoji = annotation.emoji;
+      if (annotation.comment) span.title = annotation.comment;
+      range.surroundContents(span);
     });
   }
 

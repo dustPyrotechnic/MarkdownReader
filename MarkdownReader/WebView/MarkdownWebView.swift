@@ -5,6 +5,7 @@ import WebKit
 struct MarkdownWebView: UIViewRepresentable {
     let markdown: String
     var baseURL: URL?
+    var annotations: [[String: Any]] = []
     var onRenderFinished: ((Result<Void, Error>) -> Void)?
     var onSelectionChanged: ((SelectionPayload) -> Void)?
 
@@ -31,6 +32,7 @@ struct MarkdownWebView: UIViewRepresentable {
         let coordinator = context.coordinator
         coordinator.onRenderFinished = onRenderFinished
         coordinator.onSelectionChanged = onSelectionChanged
+        coordinator.annotationsJSON = annotations
         // Skip render if markdown hasn't changed
         guard markdown != coordinator.renderedMarkdown || baseURL != coordinator.renderedBaseURL else { return }
         coordinator.pendingMarkdown = markdown
@@ -60,6 +62,7 @@ struct MarkdownWebView: UIViewRepresentable {
                     print("[MarkdownWebView] render success length=\(markdown.count)")
                     coordinator.renderedMarkdown = markdown
                     coordinator.renderedBaseURL = baseURL
+                    coordinator.applyAnnotations(in: webView)
                     coordinator.finishRender(.success(()))
                 case let .failure(error):
                     print("[MarkdownWebView] render failed length=\(markdown.count) error=\(error)")
@@ -80,6 +83,7 @@ struct MarkdownWebView: UIViewRepresentable {
         weak var webView: WKWebView?
         var onRenderFinished: ((Result<Void, Error>) -> Void)?
         var onSelectionChanged: ((SelectionPayload) -> Void)?
+        var annotationsJSON: [[String: Any]] = []
 
         init(
             onRenderFinished: ((Result<Void, Error>) -> Void)?,
@@ -105,6 +109,7 @@ struct MarkdownWebView: UIViewRepresentable {
                         print("[MarkdownWebView] initial render success length=\(pendingMarkdown.count)")
                         renderedMarkdown = pendingMarkdown
                         renderedBaseURL = pendingBaseURL
+                        applyAnnotations(in: webView)
                         finishRender(.success(()))
                     case let .failure(error):
                         print("[MarkdownWebView] initial render failed length=\(pendingMarkdown.count) error=\(error)")
@@ -137,6 +142,17 @@ struct MarkdownWebView: UIViewRepresentable {
 
         func finishRender(_ result: Result<Void, Error>) {
             Task { @MainActor in self.onRenderFinished?(result) }
+        }
+
+        /// 渲染完成后把当前批注下发给 JS，由 `setAnnotations` 重建高亮。
+        /// - Parameter webView: 目标 WebView。
+        func applyAnnotations(in webView: WKWebView) {
+            guard !annotationsJSON.isEmpty else { return }
+            webView.callAsyncJavaScript(
+                "return setAnnotations(items)",
+                arguments: ["items": annotationsJSON],
+                in: nil, in: .page, completionHandler: nil
+            )
         }
 
         func userContentController(

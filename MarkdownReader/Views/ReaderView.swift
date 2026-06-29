@@ -12,6 +12,7 @@ struct ReaderView: View {
             MarkdownWebView(
                 markdown: markdown,
                 baseURL: documentURL.deletingLastPathComponent(),
+                annotations: annotationPayloads,
                 onRenderFinished: { result in
                     isLoading = false
                     if case let .failure(error) = result {
@@ -46,5 +47,15 @@ struct ReaderView: View {
 
     private var documentURL: URL {
         URL.documentsDirectory.appending(path: document.relativePath)
+    }
+
+    /// 把文档批注转为下发给 JS 的纯字典数组（数据转换，非拆视图）。
+    private var annotationPayloads: [[String: Any]] {
+        (document.annotations ?? []).map { [
+            "rangeStart": $0.rangeStart,
+            "rangeEnd": $0.rangeEnd,
+            "comment": $0.comment,
+            "emoji": $0.emoji ?? ""
+        ] }
     }
 }
