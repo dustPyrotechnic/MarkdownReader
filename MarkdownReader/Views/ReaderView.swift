@@ -6,6 +6,7 @@ struct ReaderView: View {
     @State private var isLoading = true
     @State private var currentSelection: SelectionPayload?
     @State private var showAnnotationHUD = false
+    @State private var showAnnotationList = false
 
     var body: some View {
         ZStack {
@@ -33,6 +34,14 @@ struct ReaderView: View {
         .sheet(isPresented: $showAnnotationHUD) {
             if let currentSelection {
                 AnnotationHUD(selection: currentSelection, document: document)
+            }
+        }
+        .sheet(isPresented: $showAnnotationList) {
+            AnnotationListView(document: document)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showAnnotationList = true } label: { Image(systemName: "list.bullet.rectangle") }
             }
         }
         .navigationTitle(document.fileName)
