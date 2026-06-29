@@ -4,7 +4,7 @@ struct ReaderView: View {
     let document: Document
     @State private var markdown = ""
     @State private var isLoading = true
-    @State private var selectedText = ""
+    @State private var currentSelection: SelectionPayload?
     @State private var showAnnotationHUD = false
 
     var body: some View {
@@ -18,8 +18,8 @@ struct ReaderView: View {
                         print("[ReaderView] render failed error=\(error)")
                     }
                 }
-            ) { text in
-                selectedText = text
+            ) { payload in
+                currentSelection = payload
                 showAnnotationHUD = true
             }
             .ignoresSafeArea(edges: .bottom)

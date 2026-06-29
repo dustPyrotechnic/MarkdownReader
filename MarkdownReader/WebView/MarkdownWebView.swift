@@ -6,7 +6,7 @@ struct MarkdownWebView: UIViewRepresentable {
     let markdown: String
     var baseURL: URL?
     var onRenderFinished: ((Result<Void, Error>) -> Void)?
-    var onSelectionChanged: ((String) -> Void)?
+    var onSelectionChanged: ((SelectionPayload) -> Void)?
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onRenderFinished: onRenderFinished, onSelectionChanged: onSelectionChanged)
@@ -79,11 +79,11 @@ struct MarkdownWebView: UIViewRepresentable {
         var renderedBaseURL: URL?
         weak var webView: WKWebView?
         var onRenderFinished: ((Result<Void, Error>) -> Void)?
-        var onSelectionChanged: ((String) -> Void)?
+        var onSelectionChanged: ((SelectionPayload) -> Void)?
 
         init(
             onRenderFinished: ((Result<Void, Error>) -> Void)?,
-            onSelectionChanged: ((String) -> Void)?
+            onSelectionChanged: ((SelectionPayload) -> Void)?
         ) {
             self.onRenderFinished = onRenderFinished
             self.onSelectionChanged = onSelectionChanged
@@ -146,10 +146,8 @@ struct MarkdownWebView: UIViewRepresentable {
             switch message.name {
             case "selectionChanged":
                 guard let body = message.body as? [String: Any],
-                      let text = body["text"] as? String else {
-                    return
-                }
-                Task { @MainActor in self.onSelectionChanged?(text) }
+                      let payload = SelectionPayload(body: body) else { return }
+                Task { @MainActor in self.onSelectionChanged?(payload) }
             case "renderLog":
                 logRenderMessage(message.body)
             default:

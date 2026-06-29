@@ -530,13 +530,32 @@
     });
   }
 
+  // 计算 node 内 offset 相对 root 文本的绝对字符偏移
+  function charOffset(root, node, offset) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let count = 0;
+    let n;
+    while ((n = walker.nextNode())) {
+      if (n === node) return count + offset;
+      count += n.textContent.length;
+    }
+    return count;
+  }
+
   // 监听文字选中
   document.addEventListener('selectionchange', () => {
     const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) return;
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) return;
+    const root = document.getElementById('content');
+    if (!root) return;
+    const range = sel.getRangeAt(0);
+    if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) return;
     const text = sel.toString();
     if (text.length < 1) return;
-    window.webkit.messageHandlers.selectionChanged.postMessage({ text });
+    const rangeStart = charOffset(root, range.startContainer, range.startOffset);
+    const rangeEnd = charOffset(root, range.endContainer, range.endOffset);
+    if (rangeEnd <= rangeStart) return;
+    window.webkit.messageHandlers.selectionChanged.postMessage({ text, rangeStart, rangeEnd });
   });
 
   // 接收 Swift 调用
