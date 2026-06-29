@@ -24,11 +24,13 @@
 - 导入只支持 `.md` / `.markdown` / `.txt`；重名追加 `-1/-2`；当前是拷贝入沙盒，不原地打开外部文件。
 - 主 App Info 与 Share Extension Info 放在 `Config/`，不要放进 file-system-synchronized target 目录，避免被当作 Bundle Resource 重复复制。
 - `ShareURLScheme.swift` 同时编入主 App 与 `MarkdownReaderShare`，修改时必须确保两个 target 都能编译。
+- 批阅已完成（阶段五）：长按选中 → `SelectionPayload`（字符偏移）→ `AnnotationStore` 写库 → 重开按偏移 `restoreAnnotations` 恢复高亮 → 列表查看 / 删除。偏移基于 `#content` 文本节点累加；删除前先断开 `annotation.document` 反向关系，否则 `document.annotations` 不即时刷新。
 
 ## 延伸文档
 
 - `docs/swift-swiftui-style-guide.md` —— Swift / SwiftUI / SwiftData 逐条编码规范（命名、API 取舍、SwiftData/CloudKit、PR/SwiftLint 等）。
 - `docs/modules/file-import.md` —— 文件导入模块设计、文件布局、测试和真机验收项。
+- `docs/modules/annotation.md` —— 批阅模块设计、数据流（选区→偏移→SwiftData→恢复高亮）、偏移映射约定、可自动化 vs 真机验收项。
 - `README.md` —— 产品定位、完整技术架构、UI 方向、批阅设计、路线图。
 - `docs/plans/2026-06-26-mvp.md` —— MVP 逐 Task 实施计划。
 - `docs/plans/2026-06-29-phase4-deliverables.md` —— 阶段四文件导入交付记录（模块走读、测试覆盖、真机验收表）。

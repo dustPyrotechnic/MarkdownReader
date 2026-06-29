@@ -249,7 +249,7 @@ Swift（批注数据 ↔ SwiftData）
 - [ ] WKWebView 渲染引擎（GFM + KaTeX + Mermaid）
 - [x] 文件导入（Open In / Share Extension / Files App）
 - [ ] 多级文件夹管理（SwiftData）
-- [ ] 批阅功能（划线 + 文字/Emoji 评注）
+- [x] 批阅功能（划线 + 文字/Emoji 评注）
 - [ ] SWCharSphere 加载动画集成
 - [ ] 深浅色主题适配
 
